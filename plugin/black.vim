@@ -98,14 +98,15 @@ if _initialize_black_env():
 def Black():
   start = time.time()
   fast = bool(int(vim.eval("g:black_fast")))
-  mode = black.FileMode(
-    line_length=int(vim.eval("g:black_linelength")),
-    string_normalization=not bool(int(vim.eval("g:black_skip_string_normalization"))),
-    is_pyi=vim.current.buffer.name.endswith('.pyi'),
+  mode = black.FileMode.from_configuration(
+    py36=False,
+    pyi=vim.current.buffer.name.endswith('.pyi'),
+    skip_string_normalization=bool(int(vim.eval("g:black_skip_string_normalization"))),
+    skip_numeric_underscore_normalization=False,
   )
   buffer_str = '\n'.join(vim.current.buffer) + '\n'
   try:
-    new_buffer_str = black.format_file_contents(buffer_str, fast=fast, mode=mode)
+    new_buffer_str = black.format_file_contents(buffer_str, line_length=int(vim.eval("g:black_linelength")), fast=fast, mode=mode)
   except black.NothingChanged:
     print(f'Already well formatted, good job. (took {time.time() - start:.4f}s)')
   except Exception as exc:
